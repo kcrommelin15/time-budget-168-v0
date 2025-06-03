@@ -37,10 +37,34 @@ export default function EnhancedSettingsScreen({ user, onAuth, onLogout }: Enhan
     <div className="p-6 pb-20">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-          Settings
-        </h1>
-        <p className="text-gray-600 mt-2">Manage your account and preferences</p>
+        <div>
+          <div className="flex items-center gap-3 mb-2">
+            {/* Fun Logo */}
+            <div className="relative">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform duration-300">
+                <div className="relative">
+                  {/* Clock face */}
+                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-inner">
+                    {/* Clock hands */}
+                    <div className="absolute w-1.5 h-1.5 bg-gray-800 rounded-full"></div>
+                    <div className="absolute w-0.5 h-2 bg-gray-800 rounded-full transform -rotate-45 origin-bottom"></div>
+                    <div className="absolute w-0.5 h-1.5 bg-gray-600 rounded-full transform rotate-90 origin-bottom"></div>
+                  </div>
+                  {/* Sparkle effects */}
+                  <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse"></div>
+                  <div className="absolute -bottom-0.5 -left-0.5 w-1 h-1 bg-pink-400 rounded-full animate-ping"></div>
+                </div>
+              </div>
+              {/* Shadow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-xl blur-sm opacity-30 transform translate-y-1"></div>
+            </div>
+
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              Settings
+            </h1>
+          </div>
+          <p className="text-gray-600 mt-2">Manage your account and preferences</p>
+        </div>
       </div>
 
       {/* User Profile Section */}
