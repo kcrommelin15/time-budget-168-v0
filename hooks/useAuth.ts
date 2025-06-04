@@ -1,8 +1,8 @@
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
-import { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from "react"
+import type { User, Session } from "@supabase/supabase-js"
+import { supabase } from "@/lib/supabase"
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
@@ -12,7 +12,9 @@ export function useAuth() {
   useEffect(() => {
     // Get initial session
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
@@ -21,18 +23,18 @@ export function useAuth() {
     getSession()
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        setLoading(false)
-        
-        // Create user profile on signup
-        if (event === 'SIGNED_IN' && session?.user && !loading) {
-          await createUserProfile(session.user)
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setSession(session)
+      setUser(session?.user ?? null)
+      setLoading(false)
+
+      // Create user profile on signup
+      if (event === "SIGNED_IN" && session?.user && !loading) {
+        await createUserProfile(session.user)
       }
-    )
+    })
 
     return () => subscription.unsubscribe()
   }, [loading])
@@ -41,29 +43,29 @@ export function useAuth() {
   const createUserProfile = async (user: User) => {
     try {
       const { error } = await supabase
-        .from('user_profiles')
+        .from("user_profiles")
         .insert({
           id: user.id,
           email: user.email,
-          full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+          full_name: user.user_metadata?.full_name || user.email?.split("@")[0] || "User",
           first_login_at: new Date().toISOString(),
         })
         .select()
         .single()
 
-      if (error && error.code !== '23505') { // Ignore duplicate key error
-        console.error('Error creating user profile:', error)
+      if (error && error.code !== "23505") {
+        // Ignore duplicate key error
+        console.error("Error creating user profile:", error)
       } else {
         // Create default categories for new user
-        const { error: categoriesError } = await supabase
-          .rpc('create_default_categories', { p_user_id: user.id })
-        
+        const { error: categoriesError } = await supabase.rpc("create_default_categories", { p_user_id: user.id })
+
         if (categoriesError) {
-          console.error('Error creating default categories:', categoriesError)
+          console.error("Error creating default categories:", categoriesError)
         }
       }
     } catch (error) {
-      console.error('Error in createUserProfile:', error)
+      console.error("Error in createUserProfile:", error)
     }
   }
 
@@ -74,9 +76,9 @@ export function useAuth() {
       password,
       options: {
         data: {
-          full_name: fullName
-        }
-      }
+          full_name: fullName,
+        },
+      },
     })
     return { data, error }
   }
@@ -85,7 +87,7 @@ export function useAuth() {
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     })
     return { data, error }
   }
@@ -97,12 +99,12 @@ export function useAuth() {
   }
 
   // Sign in with OAuth (Google, GitHub, etc.)
-  const signInWithOAuth = async (provider: 'google' | 'github') => {
+  const signInWithOAuth = async (provider: "google" | "github") => {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: window.location.origin
-      }
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
     })
     return { data, error }
   }
@@ -114,6 +116,6 @@ export function useAuth() {
     signUp,
     signIn,
     signOut,
-    signInWithOAuth
+    signInWithOAuth,
   }
 }

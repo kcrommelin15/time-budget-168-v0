@@ -4,20 +4,16 @@ import { useState } from "react"
 import { LogOut, Slack, Bell, HelpCircle, Trash2, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
+import AuthModal from "@/components/auth-modal"
 
 interface EnhancedSettingsScreenProps {
   user?: any
   onAuth?: (user: any) => void
   onLogout?: () => void
-  setShowAuthModal?: (show: boolean) => void
 }
 
-export default function EnhancedSettingsScreen({
-  user,
-  onAuth,
-  onLogout,
-  setShowAuthModal,
-}: EnhancedSettingsScreenProps) {
+export default function EnhancedSettingsScreen({ user, onAuth, onLogout }: EnhancedSettingsScreenProps) {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [notifications, setNotifications] = useState({
     push: true,
   })
@@ -28,6 +24,11 @@ export default function EnhancedSettingsScreen({
     autoCategorizeIntegrations: true,
     advancedInsights: false,
   })
+
+  const handleAuth = (userData: any) => {
+    onAuth?.(userData)
+    setIsAuthModalOpen(false)
+  }
 
   // Mock streak data - in real app this would come from user data
   const streakDays = 23
@@ -84,7 +85,7 @@ export default function EnhancedSettingsScreen({
               Sync your data across devices and get AI-powered insights to optimize your time.
             </p>
             <Button
-              onClick={() => setShowAuthModal?.(true)}
+              onClick={() => setIsAuthModalOpen(true)}
               className="bg-white text-purple-600 hover:bg-gray-100 rounded-3xl h-20 px-16 text-2xl font-bold shadow-2xl transform hover:scale-105 transition-all duration-300 mb-4"
             >
               Sign In / Sign Up
@@ -290,6 +291,8 @@ export default function EnhancedSettingsScreen({
           </Button>
         </div>
       )}
+
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} onAuth={handleAuth} />
     </div>
   )
 }
