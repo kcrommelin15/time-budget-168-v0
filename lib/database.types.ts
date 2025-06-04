@@ -249,7 +249,7 @@ export type Database = {
           goal_direction?: string | null
           goal_target_max?: number | null
           goal_target_min?: number | null
-          goal_threshold?: string | null
+          goal_threshold?: number | null
           id?: string
           is_active?: boolean | null
           is_archived?: boolean | null
@@ -267,7 +267,7 @@ export type Database = {
           goal_direction?: string | null
           goal_target_max?: number | null
           goal_target_min?: number | null
-          goal_threshold?: string | null
+          goal_threshold?: number | null
           id?: string
           is_active?: boolean | null
           is_archived?: boolean | null
@@ -407,7 +407,7 @@ export type Database = {
           goal_direction?: string | null
           goal_target_max?: number | null
           goal_target_min?: number | null
-          goal_threshold?: string | null
+          goal_threshold?: number | null
           id?: string
           is_active?: boolean | null
           is_fixed?: boolean | null
@@ -425,7 +425,7 @@ export type Database = {
           goal_direction?: string | null
           goal_target_max?: number | null
           goal_target_min?: number | null
-          goal_threshold?: string | null
+          goal_threshold?: number | null
           id?: string
           is_active?: boolean | null
           is_fixed?: boolean | null
