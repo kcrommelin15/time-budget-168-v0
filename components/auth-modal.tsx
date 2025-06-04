@@ -1,162 +1,221 @@
 "use client"
 
-import type React from "react"
+import { useState } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Loader2, Mail, Lock, User } from 'lucide-react'
 
-import { useState } from "react"
-import { X, Mail, Lock, User, Github } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+export function AuthModal() {
+  const { user, loading, signUp, signIn, signOut } = useAuth()
+  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [message, setMessage] = useState('')
 
-interface AuthModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onAuth: (user: any) => void
-}
-
-export default function AuthModal({ isOpen, onClose, onAuth }: AuthModalProps) {
-  const [isLogin, setIsLogin] = useState(true)
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    name: "",
-  })
-
-  if (!isOpen) return null
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    // Mock authentication
-    const user = {
-      id: "1",
-      name: formData.name || "John Doe",
-      email: formData.email,
-      avatar: null,
-    }
-
-    onAuth(user)
-    onClose()
+  if (loading) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardContent className="flex items-center justify-center p-6">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span className="ml-2">Loading...</span>
+        </CardContent>
+      </Card>
+    )
   }
 
-  const handleOAuthLogin = (provider: string) => {
-    // Mock OAuth login
-    const user = {
-      id: "1",
-      name: "John Doe",
-      email: "john.doe@example.com",
-      avatar: null,
-    }
+  if (user) {
+    return (
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Welcome!</CardTitle>
+          <CardDescription>
+            Signed in as {user.email}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="text-sm text-gray-600">
+            <p><strong>User ID:</strong> {user.id}</p>
+            <p><strong>Email:</strong> {user.email}</p>
+          </div>
+          <Button 
+            onClick={async () => {
+              await signOut()
+              setMessage('Signed out successfully!')
+            }}
+            variant="outline"
+            className="w-full"
+          >
+            Sign Out
+          </Button>
+        </CardContent>
+      </Card>
+    )
+  }
 
-    onAuth(user)
-    onClose()
+  const handleAuth = async (type: 'signin' | 'signup') => {
+    setIsLoading(true)
+    setMessage('')
+
+    try {
+      const result = type === 'signup' 
+        ? await signUp(email, password, fullName)
+        : await signIn(email, password)
+
+      if (result.error) {
+        setMessage(result.error.message)
+      } else {
+        if (type === 'signup') {
+          setMessage('Check your email for confirmation link!')
+        } else {
+          setMessage('Signed in successfully!')
+        }
+      }
+    } catch (error) {
+      setMessage('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-3xl w-full max-w-md">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-semibold">{isLogin ? "Sign In" : "Create Account"}</h2>
-          <Button variant="ghost" size="sm" onClick={onClose} className="rounded-xl">
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-
-        <div className="p-6">
-          {/* OAuth Buttons */}
-          <div className="space-y-3 mb-6">
-            <Button
-              onClick={() => handleOAuthLogin("google")}
-              variant="outline"
-              className="w-full h-12 rounded-2xl border-gray-300"
-            >
-              <Mail className="w-5 h-5 mr-3" />
-              Continue with Google
-            </Button>
-
-            <Button
-              onClick={() => handleOAuthLogin("github")}
-              variant="outline"
-              className="w-full h-12 rounded-2xl border-gray-300"
-            >
-              <Github className="w-5 h-5 mr-3" />
-              Continue with GitHub
-            </Button>
-          </div>
-
-          <div className="relative mb-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
-            </div>
-          </div>
-
-          {/* Email Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative mt-2">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    id="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="pl-10 rounded-xl"
-                    placeholder="Enter your full name"
-                    required={!isLogin}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <div className="relative mt-2">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <CardTitle>Authentication</CardTitle>
+        <CardDescription>
+          Sign in or create an account to access your time budget data
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="signin" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="signin" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="signin-email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  id="email"
+                  id="signin-email"
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="pl-10 rounded-xl"
-                  placeholder="Enter your email"
-                  required
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
                 />
               </div>
             </div>
-
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative mt-2">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            
+            <div className="space-y-2">
+              <Label htmlFor="signin-password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
-                  id="password"
+                  id="signin-password"
                   type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="pl-10 rounded-xl"
-                  placeholder="Enter your password"
-                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
                 />
               </div>
             </div>
-
-            <Button type="submit" className="w-full h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600">
-              {isLogin ? "Sign In" : "Create Account"}
+            
+            <Button 
+              onClick={() => handleAuth('signin')}
+              disabled={isLoading || !email || !password}
+              className="w-full"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <button onClick={() => setIsLogin(!isLogin)} className="text-blue-600 hover:text-blue-700 font-medium">
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-            </button>
+          </TabsContent>
+          
+          <TabsContent value="signup" className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="signup-name">Full Name</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="signup-name"
+                  type="text"
+                  placeholder="Your Name"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="signup-email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="signup-email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="signup-password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  id="signup-password"
+                  type="password"
+                  placeholder="Min 6 characters"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            
+            <Button 
+              onClick={() => handleAuth('signup')}
+              disabled={isLoading || !email || !password || password.length < 6}
+              className="w-full"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                'Create Account'
+              )}
+            </Button>
+          </TabsContent>
+        </Tabs>
+        
+        {message && (
+          <div className={`mt-4 p-3 rounded-md text-sm ${
+            message.includes('successfully') || message.includes('Check your email')
+              ? 'bg-green-50 text-green-800 border border-green-200'
+              : 'bg-red-50 text-red-800 border border-red-200'
+          }`}>
+            {message}
           </div>
-        </div>
-      </div>
-    </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }
