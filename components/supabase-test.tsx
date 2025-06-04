@@ -75,4 +75,4 @@ export function SupabaseTest() {
       </CardContent>
     </Card>
   )
-} 
+}

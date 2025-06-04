@@ -7,10 +7,13 @@ import EnhancedInsightsScreen from "@/components/enhanced-insights-screen"
 import EnhancedSettingsScreen from "@/components/enhanced-settings-screen"
 import Navigation from "@/components/navigation"
 import FloatingToggle from "@/components/floating-toggle"
+import AuthModal from "@/components/auth-modal"
+import { X } from "lucide-react"
 
 export default function TimeBudgetApp() {
   const [activeScreen, setActiveScreen] = useState<"budget" | "timeline" | "insights" | "settings">("budget")
   const [user, setUser] = useState(null)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative">
@@ -25,7 +28,12 @@ export default function TimeBudgetApp() {
             {activeScreen === "timeline" && <TimelineScreen isDesktop={true} />}
             {activeScreen === "insights" && <EnhancedInsightsScreen />}
             {activeScreen === "settings" && (
-              <EnhancedSettingsScreen user={user} onAuth={setUser} onLogout={() => setUser(null)} />
+              <EnhancedSettingsScreen
+                user={user}
+                onAuth={setUser}
+                onLogout={() => setUser(null)}
+                setShowAuthModal={setShowAuthModal}
+              />
             )}
           </div>
         </div>
@@ -36,7 +44,12 @@ export default function TimeBudgetApp() {
           {activeScreen === "timeline" && <TimelineScreen />}
           {activeScreen === "insights" && <EnhancedInsightsScreen />}
           {activeScreen === "settings" && (
-            <EnhancedSettingsScreen user={user} onAuth={setUser} onLogout={() => setUser(null)} />
+            <EnhancedSettingsScreen
+              user={user}
+              onAuth={setUser}
+              onLogout={() => setUser(null)}
+              setShowAuthModal={setShowAuthModal}
+            />
           )}
         </div>
 
@@ -49,6 +62,21 @@ export default function TimeBudgetApp() {
         <div className="hidden lg:block">
           <FloatingToggle activeScreen={activeScreen} onScreenChange={setActiveScreen} />
         </div>
+
+        {/* Auth Modal */}
+        {showAuthModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="relative">
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-lg hover:bg-gray-100 z-10"
+              >
+                <X className="h-4 w-4" />
+              </button>
+              <AuthModal />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

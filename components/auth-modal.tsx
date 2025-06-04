@@ -1,21 +1,21 @@
 "use client"
 
-import { useState } from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, Mail, Lock, User } from 'lucide-react'
+import { useState } from "react"
+import { useAuth } from "@/hooks/useAuth"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Loader2, Mail, Lock, User } from "lucide-react"
 
-export function AuthModal() {
+export default function AuthModal() {
   const { user, loading, signUp, signIn, signOut } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [message, setMessage] = useState('')
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [fullName, setFullName] = useState("")
+  const [message, setMessage] = useState("")
 
   if (loading) {
     return (
@@ -33,19 +33,21 @@ export function AuthModal() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Welcome!</CardTitle>
-          <CardDescription>
-            Signed in as {user.email}
-          </CardDescription>
+          <CardDescription>Signed in as {user.email}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="text-sm text-gray-600">
-            <p><strong>User ID:</strong> {user.id}</p>
-            <p><strong>Email:</strong> {user.email}</p>
+            <p>
+              <strong>User ID:</strong> {user.id}
+            </p>
+            <p>
+              <strong>Email:</strong> {user.email}
+            </p>
           </div>
-          <Button 
+          <Button
             onClick={async () => {
               await signOut()
-              setMessage('Signed out successfully!')
+              setMessage("Signed out successfully!")
             }}
             variant="outline"
             className="w-full"
@@ -57,26 +59,24 @@ export function AuthModal() {
     )
   }
 
-  const handleAuth = async (type: 'signin' | 'signup') => {
+  const handleAuth = async (type: "signin" | "signup") => {
     setIsLoading(true)
-    setMessage('')
+    setMessage("")
 
     try {
-      const result = type === 'signup' 
-        ? await signUp(email, password, fullName)
-        : await signIn(email, password)
+      const result = type === "signup" ? await signUp(email, password, fullName) : await signIn(email, password)
 
       if (result.error) {
         setMessage(result.error.message)
       } else {
-        if (type === 'signup') {
-          setMessage('Check your email for confirmation link!')
+        if (type === "signup") {
+          setMessage("Check your email for confirmation link!")
         } else {
-          setMessage('Signed in successfully!')
+          setMessage("Signed in successfully!")
         }
       }
     } catch (error) {
-      setMessage('An unexpected error occurred')
+      setMessage("An unexpected error occurred")
     } finally {
       setIsLoading(false)
     }
@@ -86,9 +86,7 @@ export function AuthModal() {
     <Card className="w-full max-w-md">
       <CardHeader>
         <CardTitle>Authentication</CardTitle>
-        <CardDescription>
-          Sign in or create an account to access your time budget data
-        </CardDescription>
+        <CardDescription>Sign in or create an account to access your time budget data</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="signin" className="w-full">
@@ -96,7 +94,7 @@ export function AuthModal() {
             <TabsTrigger value="signin">Sign In</TabsTrigger>
             <TabsTrigger value="signup">Sign Up</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="signin" className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="signin-email">Email</Label>
@@ -112,7 +110,7 @@ export function AuthModal() {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="signin-password">Password</Label>
               <div className="relative">
@@ -126,23 +124,19 @@ export function AuthModal() {
                 />
               </div>
             </div>
-            
-            <Button 
-              onClick={() => handleAuth('signin')}
-              disabled={isLoading || !email || !password}
-              className="w-full"
-            >
+
+            <Button onClick={() => handleAuth("signin")} disabled={isLoading || !email || !password} className="w-full">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing In...
                 </>
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </Button>
           </TabsContent>
-          
+
           <TabsContent value="signup" className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="signup-name">Full Name</Label>
@@ -158,7 +152,7 @@ export function AuthModal() {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="signup-email">Email</Label>
               <div className="relative">
@@ -173,7 +167,7 @@ export function AuthModal() {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="signup-password">Password</Label>
               <div className="relative">
@@ -188,9 +182,9 @@ export function AuthModal() {
                 />
               </div>
             </div>
-            
-            <Button 
-              onClick={() => handleAuth('signup')}
+
+            <Button
+              onClick={() => handleAuth("signup")}
               disabled={isLoading || !email || !password || password.length < 6}
               className="w-full"
             >
@@ -200,18 +194,20 @@ export function AuthModal() {
                   Creating Account...
                 </>
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </Button>
           </TabsContent>
         </Tabs>
-        
+
         {message && (
-          <div className={`mt-4 p-3 rounded-md text-sm ${
-            message.includes('successfully') || message.includes('Check your email')
-              ? 'bg-green-50 text-green-800 border border-green-200'
-              : 'bg-red-50 text-red-800 border border-red-200'
-          }`}>
+          <div
+            className={`mt-4 p-3 rounded-md text-sm ${
+              message.includes("successfully") || message.includes("Check your email")
+                ? "bg-green-50 text-green-800 border border-green-200"
+                : "bg-red-50 text-red-800 border border-red-200"
+            }`}
+          >
             {message}
           </div>
         )}

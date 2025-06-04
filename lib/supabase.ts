@@ -29,4 +29,4 @@ export async function testSupabaseConnection() {
 }
 
 // Export types for use in components
-export type { Database } from './database.types' 
+export type { Database } from './database.types'
