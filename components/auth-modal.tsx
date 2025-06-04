@@ -1,162 +1,197 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
-import { X, Mail, Lock, User, Github } from "lucide-react"
+import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Loader2, Mail, Lock, X } from "lucide-react"
 
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
-  onAuth: (user: any) => void
+  onAuth?: (user: any) => void
 }
 
 export default function AuthModal({ isOpen, onClose, onAuth }: AuthModalProps) {
-  const [isLogin, setIsLogin] = useState(true)
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    name: "",
-  })
+  const { user, loading, signUp, signIn, signInWithOAuth } = useAuth()
+  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [message, setMessage] = useState("")
 
-  if (!isOpen) return null
+  const handleEmailAuth = async () => {
+    setIsLoading(true)
+    setMessage("")
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    try {
+      const result = isSignUp ? await signUp(email, password) : await signIn(email, password)
 
-    // Mock authentication
-    const user = {
-      id: "1",
-      name: formData.name || "John Doe",
-      email: formData.email,
-      avatar: null,
+      if (result.error) {
+        setMessage(result.error.message)
+      } else {
+        if (isSignUp) {
+          setMessage("Check your email for confirmation link!")
+        } else {
+          setMessage("Signed in successfully!")
+          onAuth?.(result.data.user)
+          setTimeout(() => onClose(), 1000)
+        }
+      }
+    } catch (error) {
+      setMessage("An unexpected error occurred")
+    } finally {
+      setIsLoading(false)
     }
-
-    onAuth(user)
-    onClose()
   }
 
-  const handleOAuthLogin = (provider: string) => {
-    // Mock OAuth login
-    const user = {
-      id: "1",
-      name: "John Doe",
-      email: "john.doe@example.com",
-      avatar: null,
-    }
+  const handleGoogleAuth = async () => {
+    setIsLoading(true)
+    setMessage("")
 
-    onAuth(user)
+    try {
+      const result = await signInWithOAuth("google")
+      if (result.error) {
+        setMessage(result.error.message)
+      }
+      // OAuth will redirect, so we don't need to handle success here
+    } catch (error) {
+      setMessage("An unexpected error occurred")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const resetForm = () => {
+    setEmail("")
+    setPassword("")
+    setMessage("")
+    setIsSignUp(false)
+  }
+
+  const handleClose = () => {
+    resetForm()
     onClose()
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-3xl w-full max-w-md">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-xl font-semibold">{isLogin ? "Sign In" : "Create Account"}</h2>
-          <Button variant="ghost" size="sm" onClick={onClose} className="rounded-xl">
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-
-        <div className="p-6">
-          {/* OAuth Buttons */}
-          <div className="space-y-3 mb-6">
-            <Button
-              onClick={() => handleOAuthLogin("google")}
-              variant="outline"
-              className="w-full h-12 rounded-2xl border-gray-300"
-            >
-              <Mail className="w-5 h-5 mr-3" />
-              Continue with Google
-            </Button>
-
-            <Button
-              onClick={() => handleOAuthLogin("github")}
-              variant="outline"
-              className="w-full h-12 rounded-2xl border-gray-300"
-            >
-              <Github className="w-5 h-5 mr-3" />
-              Continue with GitHub
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md p-0 gap-0">
+        <DialogHeader className="p-6 pb-4">
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-semibold">{isSignUp ? "Sign Up" : "Sign In"}</DialogTitle>
+            <Button variant="ghost" size="sm" onClick={handleClose} className="h-6 w-6 p-0">
+              <X className="h-4 w-4" />
             </Button>
           </div>
+        </DialogHeader>
 
-          <div className="relative mb-6">
+        <div className="px-6 pb-6 space-y-4">
+          {/* Google OAuth Button */}
+          <Button
+            onClick={handleGoogleAuth}
+            disabled={isLoading}
+            variant="outline"
+            className="w-full h-12 text-sm font-medium"
+          >
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Mail className="mr-2 h-4 w-4" />}
+            Continue with Google
+          </Button>
+
+          {/* Divider */}
+          <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <span className="w-full border-t" />
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
             </div>
           </div>
 
           {/* Email Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
-              <div>
-                <Label htmlFor="name">Full Name</Label>
-                <div className="relative mt-2">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input
-                    id="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="pl-10 rounded-xl"
-                    placeholder="Enter your full name"
-                    required={!isLogin}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <div className="relative mt-2">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium">
+                Email
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="email"
                   type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="pl-10 rounded-xl"
                   placeholder="Enter your email"
-                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10 h-12"
                 />
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <div className="relative mt-2">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-sm font-medium">
+                Password
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="password"
                   type="password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="pl-10 rounded-xl"
                   placeholder="Enter your password"
-                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10 h-12"
                 />
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-12 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-600">
-              {isLogin ? "Sign In" : "Create Account"}
+            <Button
+              onClick={handleEmailAuth}
+              disabled={isLoading || !email || !password}
+              className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isSignUp ? "Creating Account..." : "Signing In..."}
+                </>
+              ) : isSignUp ? (
+                "Sign Up"
+              ) : (
+                "Sign In"
+              )}
             </Button>
-          </form>
 
-          <div className="mt-6 text-center">
-            <button onClick={() => setIsLogin(!isLogin)} className="text-blue-600 hover:text-blue-700 font-medium">
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-            </button>
+            {/* Toggle Sign Up/Sign In */}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(!isSignUp)
+                  setMessage("")
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Sign up"}
+              </button>
+            </div>
           </div>
+
+          {/* Message Display */}
+          {message && (
+            <div
+              className={`p-3 rounded-md text-sm ${
+                message.includes("successfully") || message.includes("Check your email")
+                  ? "bg-green-50 text-green-800 border border-green-200"
+                  : "bg-red-50 text-red-800 border border-red-200"
+              }`}
+            >
+              {message}
+            </div>
+          )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
