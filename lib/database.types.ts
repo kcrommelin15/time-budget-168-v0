@@ -1,6 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       active_sessions: {
@@ -249,7 +249,7 @@ export interface Database {
           goal_direction?: string | null
           goal_target_max?: number | null
           goal_target_min?: number | null
-          goal_threshold?: number | null
+          goal_threshold?: string | null
           id?: string
           is_active?: boolean | null
           is_archived?: boolean | null
@@ -267,7 +267,7 @@ export interface Database {
           goal_direction?: string | null
           goal_target_max?: number | null
           goal_target_min?: number | null
-          goal_threshold?: number | null
+          goal_threshold?: string | null
           id?: string
           is_active?: boolean | null
           is_archived?: boolean | null
@@ -407,7 +407,7 @@ export interface Database {
           goal_direction?: string | null
           goal_target_max?: number | null
           goal_target_min?: number | null
-          goal_threshold?: number | null
+          goal_threshold?: string | null
           id?: string
           is_active?: boolean | null
           is_fixed?: boolean | null
@@ -425,7 +425,7 @@ export interface Database {
           goal_direction?: string | null
           goal_target_max?: number | null
           goal_target_min?: number | null
-          goal_threshold?: number | null
+          goal_threshold?: string | null
           id?: string
           is_active?: boolean | null
           is_fixed?: boolean | null
