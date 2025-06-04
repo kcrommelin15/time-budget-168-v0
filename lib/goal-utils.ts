@@ -1,6 +1,8 @@
 import type { Subcategory } from "./types"
+import { type LucideIcon, Target, ArrowDown, ArrowUp, Minus } from "lucide-react"
 
 export type GoalStatus = "excellent" | "good" | "warning" | "danger"
+export type GoalDirection = "more_is_better" | "less_is_better" | "target" | undefined
 
 export interface SubcategoryInsight {
   status: GoalStatus
@@ -33,6 +35,91 @@ export function formatTime(hours: number, omitZeroMinutes = false): string {
   }
 
   return `${h}h ${m.toString().padStart(2, "0")}m`
+}
+
+// Add the missing getGoalTypeIcon function
+export function getGoalTypeIcon(goalDirection: GoalDirection): LucideIcon {
+  switch (goalDirection) {
+    case "more_is_better":
+      return ArrowUp
+    case "less_is_better":
+      return ArrowDown
+    case "target":
+      return Target
+    default:
+      return Minus
+  }
+}
+
+// Add the missing getGoalTypeLabel function
+export function getGoalTypeLabel(goalDirection: GoalDirection): string {
+  switch (goalDirection) {
+    case "more_is_better":
+      return "More is better"
+    case "less_is_better":
+      return "Less is better"
+    case "target":
+      return "Target range"
+    default:
+      return "No goal"
+  }
+}
+
+// Add the missing analyzeSubcategoryProgress function
+export function analyzeSubcategoryProgress(
+  timeUsed: number,
+  budget: number,
+  goalDirection?: GoalDirection,
+): { status: GoalStatus; percentage: number } {
+  const weekProgress = calculateWeekProgress()
+  const projectedTotal = weekProgress > 0 ? timeUsed / weekProgress : timeUsed
+  const percentageUsed = budget > 0 ? timeUsed / budget : 0
+  const percentageFromTarget = budget > 0 ? Math.abs(timeUsed - budget) / budget : 0
+
+  let status: GoalStatus = "good"
+
+  // Default behavior if no goal direction is specified
+  if (!goalDirection || goalDirection === "target") {
+    if (percentageFromTarget <= 0.1) {
+      // Within 10% of target
+      status = "excellent"
+    } else if (percentageFromTarget <= 0.3) {
+      // 11%-30% away from target
+      status = "warning"
+    } else {
+      // More than 30% away from target
+      status = "danger"
+    }
+  }
+  // More is better goal direction
+  else if (goalDirection === "more_is_better") {
+    if (projectedTotal >= budget * 1.1) {
+      status = "excellent"
+    } else if (projectedTotal >= budget * 0.9) {
+      status = "good"
+    } else if (projectedTotal >= budget * 0.7) {
+      status = "warning"
+    } else {
+      status = "danger"
+    }
+  }
+  // Less is better goal direction
+  else if (goalDirection === "less_is_better") {
+    if (projectedTotal <= budget * 0.9) {
+      status = "excellent"
+    } else if (projectedTotal <= budget * 1.1) {
+      status = "good"
+    } else if (projectedTotal <= budget * 1.3) {
+      status = "warning"
+    } else {
+      status = "danger"
+    }
+  }
+
+  return {
+    status,
+    percentage: percentageUsed,
+  }
 }
 
 // Update analyzeSubcategory to use the new formatTime function consistently
@@ -168,5 +255,21 @@ export function getStatusColors(status: GoalStatus) {
         background: "#d1fae5",
         text: "#065f46",
       }
+  }
+}
+
+// Add the missing getStatusColor function (singular form)
+export function getStatusColor(status: GoalStatus): string {
+  switch (status) {
+    case "excellent":
+      return "#10b981" // green-500
+    case "good":
+      return "#10b981" // green-500
+    case "warning":
+      return "#f59e0b" // amber-500
+    case "danger":
+      return "#ef4444" // red-500
+    default:
+      return "#10b981" // Default to green
   }
 }
