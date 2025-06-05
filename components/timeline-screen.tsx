@@ -139,6 +139,7 @@ export default function TimelineScreen({ isDesktop = false }: TimelineScreenProp
     let increment = 60
     if (zoomLevel <= 0.5) increment = 120
     else if (zoomLevel <= 0.8) increment = 60
+    else if (zoomLevel >= 1.5) increment = 15
     else increment = 30
 
     const spannedSlots = []
@@ -198,28 +199,7 @@ export default function TimelineScreen({ isDesktop = false }: TimelineScreenProp
       >
         <div className="p-6 pb-4">
           <div className="flex items-center gap-3 mb-4">
-            {/* Fun Logo */}
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-6 transition-transform duration-300">
-                <div className="relative">
-                  {/* Clock face */}
-                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-inner">
-                    {/* Clock hands */}
-                    <div className="absolute w-1.5 h-1.5 bg-gray-800 rounded-full"></div>
-                    <div className="absolute w-0.5 h-2 bg-gray-800 rounded-full transform -rotate-45 origin-bottom"></div>
-                    <div className="absolute w-0.5 h-1.5 bg-gray-600 rounded-full transform rotate-90 origin-bottom"></div>
-                  </div>
-                  {/* Sparkle effects */}
-                  <div className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-yellow-400 rounded-full animate-pulse"></div>
-                  <div className="absolute -bottom-0.5 -left-0.5 w-1 h-1 bg-pink-400 rounded-full animate-ping"></div>
-                </div>
-              </div>
-              {/* Shadow */}
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-purple-600 to-pink-500 rounded-xl blur-sm opacity-30 transform translate-y-1"></div>
-            </div>
-
             <h1 className="text-3xl font-bold text-gray-900">{formatDate(selectedDate)}</h1>
-
             <button
               onClick={() => setIsDatePickerOpen(true)}
               className="flex items-center justify-center w-8 h-8 bg-white border border-gray-300 rounded-full shadow-sm hover:bg-gray-50"
